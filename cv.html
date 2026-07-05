@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giancarlo Crudele · Curriculum Vitae</title>
+  <meta name="description" content="Curriculum vitae di Giancarlo Crudele, sviluppatore software: esperienza, istruzione, competenze, lingue e contatti." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📜</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #b8860b; --ink: #3a2a17; --parch: #f7ecd4; --parch-d: #efe0bd;
+      --accent: #c0392b; --font-title: "Cinzel", Georgia, serif; --font-body: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--parch); color: var(--ink); line-height: 1.6; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.2rem 4rem; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+    .back3d { text-decoration: none; font-weight: 600; color: var(--ink); background: var(--parch-d); border: 1px solid #d8c49a; padding: .45rem .9rem; border-radius: 999px; }
+    .lang-switch button { border: 1px solid #d8c49a; background: var(--parch-d); cursor: pointer; color: var(--ink); font-family: var(--font-title); font-weight: 700; padding: .35rem .7rem; border-radius: 999px; }
+    .lang-switch button.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+    header.hero { text-align: center; margin-bottom: 2rem; }
+    header.hero img { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover; }
+    header.hero h1 { font-family: var(--font-title); font-size: 1.9rem; margin-top: .6rem; }
+    header.hero .role { color: #8a6a3a; font-style: italic; }
+    section { margin-bottom: 2.2rem; }
+    h2 { font-family: var(--font-title); font-size: 1.3rem; color: #5a3d18; border-bottom: 2px solid #d8c49a; padding-bottom: .3rem; margin-bottom: .8rem; }
+    h3 { font-size: 1.02rem; margin-top: .8rem; }
+    .when { font-size: .8rem; font-weight: 700; color: #9c6e1f; }
+    .where { color: #7a5a30; font-size: .9rem; }
+    ul { padding-left: 1.2rem; }
+    .bar { margin: .5rem 0; }
+    .bar-top { display: flex; justify-content: space-between; font-size: .88rem; font-weight: 600; }
+    .bar-track { height: 9px; background: #ddc9a0; border-radius: 99px; overflow: hidden; margin-top: .2rem; }
+    .bar-track i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold), var(--accent)); }
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+    .tags span { background: #e7d5aa; font-size: .8rem; font-weight: 600; padding: .25rem .6rem; border-radius: 99px; }
+    .hobby-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .6rem; }
+    .hobby { text-align: center; background: #efe0bd; border-radius: 12px; padding: .7rem .4rem; }
+    .hobby span { font-size: 1.6rem; display: block; }
+    .contact a { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); background: #efe0bd; border-radius: 10px; padding: .6rem .8rem; margin-bottom: .5rem; font-weight: 600; }
+    .btn-cv { display: inline-flex; gap: .5rem; margin-top: .4rem; background: var(--accent); color: #fff; text-decoration: none; font-family: var(--font-title); font-weight: 700; padding: .7rem 1.2rem; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back3d" href="3d/">🏰 <span id="back-label">Visita la città 3D</span></a>
+      <div class="lang-switch">
+        <button id="lang-it" class="active">IT</button>
+        <button id="lang-en">EN</button>
+      </div>
+    </div>
+    <header class="hero">
+      <img id="photo" src="assets/foto.jpg" alt="Giancarlo Crudele" onerror="this.style.display='none'">
+      <h1 id="name"></h1>
+      <div class="role" id="role"></div>
+    </header>
+    <main id="cv"></main>
+  </div>
+
+  <script type="module">
+    import "./js/content.js"; // definisce window.CONTENT (fonte unica dei testi)
+    const CONTENT = window.CONTENT;
+    let LANG = localStorage.getItem("lang") || "it";
+    const L = v => (v == null ? "" : typeof v === "string" ? v : (v[LANG] ?? v.it ?? ""));
+    const bar = (name, label, value) => `<div class="bar"><div class="bar-top"><span>${name}</span><span>${label}</span></div><div class="bar-track"><i style="width:${value}%"></i></div></div>`;
+
+    function renderSection(id) {
+      const s = CONTENT.sections[id];
+      let h = `<section id="${id}"><h2>${s.icon} ${L(s.title)}</h2>`;
+      if (id === "about") {
+        h += s.body[LANG].map(p => `<p>${p}</p>`).join("");
+      } else if (id === "experience" || id === "education") {
+        s.items.forEach(it => {
+          h += `<div><div class="when">${L(it.period)}</div><h3>${L(it.role)}</h3>
+            <div class="where">${L(it.org)} · ${L(it.place)}</div>
+            <ul>${it.desc[LANG].map(x => `<li>${x}</li>`).join("")}</ul></div>`;
+        });
+      } else if (id === "skills") {
+        s.groups.forEach(g => {
+          h += `<h3>${L(g.name)}</h3>`;
+          g.skills.forEach(sk => h += bar(sk.name, sk.level + "", sk.level));
+        });
+        h += `<div class="tags">${s.tags[LANG].map(t => `<span>${t}</span>`).join("")}</div>`;
+      } else if (id === "languages") {
+        s.items.forEach(it => h += bar(L(it.name), L(it.level), it.value));
+      } else if (id === "hobbies") {
+        h += `<div class="hobby-grid">${s.items.map(x => `<div class="hobby"><span>${x.icon}</span><b>${L(x.label)}</b></div>`).join("")}</div>`;
+      } else if (id === "contact") {
+        const p = CONTENT.profile;
+        h += `<p>${L(s.text)}</p><div class="contact">
+            <a href="mailto:${p.email}">✉️ ${p.email}</a>
+            <a href="tel:${p.phone.replace(/\s/g, "")}">📞 ${p.phone}</a>
+            <a href="${p.linkedin}" target="_blank" rel="noopener">💼 LinkedIn</a>
+          </div><a class="btn-cv" href="${p.cvFile}" download>⬇️ ${L(CONTENT.ui.downloadCv)}</a>`;
+      }
+      return h + "</section>";
+    }
+
+    function render() {
+      document.documentElement.lang = LANG;
+      document.querySelector("#name").textContent = CONTENT.profile.name;
+      document.querySelector("#role").textContent = L(CONTENT.profile.role);
+      document.querySelector("#back-label").textContent = LANG === "it" ? "Visita la città 3D" : "Visit the 3D city";
+      document.querySelector("#cv").innerHTML =
+        ["about", "experience", "education", "skills", "languages", "hobbies", "contact"].map(renderSection).join("");
+      document.querySelector("#lang-it").classList.toggle("active", LANG === "it");
+      document.querySelector("#lang-en").classList.toggle("active", LANG === "en");
+    }
+    document.querySelector("#lang-it").addEventListener("click", () => { LANG = "it"; localStorage.setItem("lang", "it"); render(); });
+    document.querySelector("#lang-en").addEventListener("click", () => { LANG = "en"; localStorage.setItem("lang", "en"); render(); });
+    render();
+  </script>
+</body>
+</html>

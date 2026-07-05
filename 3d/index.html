@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Giancarlo Crudele · CV interattivo — Città medievale 3D</title>
+  <meta name="description" content="Il curriculum di Giancarlo Crudele è una città medievale 3D esplorabile: entra negli edifici per scoprire esperienza, competenze e contatti." />
+  <!-- Anteprima social (URL assoluti del deploy Render) -->
+  <meta property="og:title" content="Giancarlo Crudele · CV interattivo 3D" />
+  <meta property="og:description" content="Un curriculum a forma di città medievale esplorabile. Entra e visita i quartieri!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://giancarlo-crudele-cv.onrender.com/3d/" />
+  <meta property="og:image" content="https://giancarlo-crudele-cv.onrender.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="game.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>">
+
+  <!-- Three.js ora arriva da npm (bundle Vite), niente più CDN/import-map -->
+</head>
+<body>
+
+  <!-- Caricamento -->
+  <div id="loader"><div class="torch">🔥</div><p>Preparo la città…</p></div>
+
+  <!-- Canvas 3D -->
+  <div id="app"></div>
+
+  <!-- Dissolvenza per la transizione d'ingresso nelle porte -->
+  <div id="fade"></div>
+
+  <!-- Pergamena di benvenuto (testi da content.js, riempita da JS) -->
+  <div id="welcome" class="welcome-overlay">
+    <div class="welcome-card">
+      <h1 id="welcome-title"></h1>
+      <p id="welcome-text"></p>
+      <p id="welcome-keys" class="keys"></p>
+      <button id="welcome-btn"></button>
+    </div>
+  </div>
+
+  <!-- Etichette fluttuanti degli edifici (riempite da JS) -->
+  <div id="labels"></div>
+
+  <!-- Interfaccia -->
+  <header class="hud-top">
+    <div class="hud-brand"><span>🏰</span> <strong>Giancarlo Crudele</strong>
+      <span id="visit-counter" class="visit-counter" title="Sezioni visitate">0/7</span>
+    </div>
+    <div class="hud-right">
+      <a id="skip-cv" class="hud-btn" href="../cv.html" title="Salta al CV / Skip to CV">📄</a>
+      <button id="sound-toggle" class="hud-btn" title="Audio">🔇</button>
+      <button id="night-toggle" class="hud-btn" title="Giorno/Notte">🌙</button>
+      <div class="lang-switch">
+        <button id="lang-it" class="active">IT</button>
+        <button id="lang-en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Suggerimento comandi -->
+  <div id="controls-hint" class="controls-hint">
+    <b>WASD</b> / frecce per muoverti · <b>SPAZIO</b> per saltare · trascina per ruotare · rotella per lo zoom
+  </div>
+
+  <!-- Prompt "entra nella porta" -->
+  <div id="prompt" class="prompt"><span class="key">E</span> <span id="prompt-text"></span></div>
+
+  <!-- Joystick mobile -->
+  <div id="joystick" class="joystick"><div id="joystick-knob" class="joystick-knob"></div></div>
+  <button id="jump-btn-mobile" class="jump-btn-mobile" aria-label="Salta">⤴</button>
+  <button id="enter-btn-mobile" class="enter-btn-mobile">Entra</button>
+
+  <!-- STENDARDO (overlay del CV) -->
+  <div id="banner-overlay" class="banner-overlay">
+    <div class="banner">
+      <div class="banner-rod top"></div>
+      <div id="banner-scroll" class="banner-scroll"></div>
+      <div class="banner-rod bottom"></div>
+      <button id="banner-close" class="banner-close" aria-label="Chiudi">✕</button>
+    </div>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>

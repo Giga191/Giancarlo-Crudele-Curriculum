@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giancarlo Crudele · CV interattivo</title>
+  <meta name="description" content="Curriculum vitae interattivo di Giancarlo Crudele — sviluppatore software." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏙️</text></svg>">
+</head>
+<body>
+
+  <!-- Schermo di caricamento -->
+  <div id="loader"><div class="loader-spin"></div></div>
+
+  <!-- Barra superiore -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🏙️</span>
+      <div>
+        <strong id="profile-name">Giancarlo Crudele</strong>
+        <small id="profile-role"></small>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a id="dl-top" class="btn btn-soft" href="#" download></a>
+      <button id="sound-toggle" class="icon-btn" title="Audio" aria-label="Audio">🔇</button>
+      <button id="theme-toggle" class="icon-btn" title="Giorno / Notte" aria-label="Giorno / Notte">🌙</button>
+      <div class="lang-switch">
+        <button id="lang-it" class="active">IT</button>
+        <button id="lang-en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-avatar">
+        <img src="assets/foto.jpg" alt="Giancarlo Crudele"
+             onerror="this.style.display='none';this.parentElement.classList.add('no-photo')">
+        <span class="avatar-initials">GC</span>
+      </div>
+      <h1 id="hero-title">Benvenuto nella mia città 🌆</h1>
+      <p id="hint" class="hero-hint"></p>
+      <button id="enter-btn" class="btn btn-primary btn-lg"></button>
+    </div>
+    <div class="scroll-cue">↓</div>
+  </section>
+
+  <!-- PALCO DELLA CITTÀ -->
+  <section id="city-stage" class="city-stage">
+    <svg id="city" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+  </section>
+
+  <footer class="site-footer"><span id="footer"></span></footer>
+
+  <!-- OVERLAY DI SEZIONE -->
+  <div id="overlay" class="overlay">
+    <div id="overlay-bg" class="overlay-bg"></div>
+    <aside id="panel" class="panel"></aside>
+  </div>
+
+  <script src="js/content.js"></script>
+  <script src="js/city.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

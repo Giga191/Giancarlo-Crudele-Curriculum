@@ -1,0 +1,20 @@
+{
+  "name": "progetto-sito-curriculum",
+  "version": "1.0.0",
+  "description": "CV interattivo di Giancarlo Crudele: città medievale 3D (Three.js + Vite), bilingue IT/EN.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "nipplejs": "^1.0.4",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.3.0",
+    "vite": "^8.1.3"
+  }
+}
