@@ -14,6 +14,11 @@
 > Aggiornare SEMPRE questa sezione con l'ultima cosa chiesta all'utente, così se cambia chat
 > si riprende esattamente da qui.
 
+**Stato (2026-07-07):** ✅ **CV e foto aggiornati** dal nuovo curriculum fornito dall'utente
+(cartella `Nuovo Cv e nuova foto/`): nuova foto profilo (giacca) ritagliata a 400×400,
+nuovo lavoro **Sviluppatore @ Tecno Quality**, nuove competenze (VB.NET, Power BI, Apache
+Superset, Hyper-V, Docker, BI/VPN), PDF scaricabile aggiornato. Vedi changelog 2026-07-07.
+
 **Stato (2026-07-06):** 🎉 **SITO ONLINE!** → **https://giancarlo-crudele-cv.onrender.com**
 Deploy su Render completato (vedi changelog). Repo: https://github.com/Giga191/Giancarlo-Crudele-Curriculum
 (pubblico, branch `master`, auto-deploy attivo: ogni `git push` ripubblica da solo).
@@ -186,6 +191,23 @@ cinema, musica, moda. Scrive in italiano.
 ---
 
 ## 8. Changelog (aggiungere in cima, con data)
+
+### 2026-07-07 (aggiornamento CV + foto nuova) 📄📸
+Richiesta utente: integrare le info del nuovo curriculum (`Nuovo Cv e nuova foto/`) e la nuova foto.
+- **Foto profilo**: `Nuovo Cv e nuova foto/Foto.png` (1180×1333, ritratto in giacca) → ritaglio
+  quadrato centrato sul volto (lato 1080, offset x50/y40) e resize a **400×400**, JPG q88 (~21 KB)
+  via **System.Drawing (PowerShell)** — niente sharp/ImageMagick disponibili. Salvata sia in
+  `public/assets/foto.jpg` (runtime servito) sia in `assets/foto.jpg` (sorgente). Mostrata in cerchio
+  nel banner "Chi sono" del 3D e nell'header di `cv.html`.
+- **`js/content.js`** (fonte unica testi): aggiunto il lavoro attuale **Sviluppatore @ Tecno Quality**
+  (Rutigliano, Dic 2025 – Attuale) in cima a `experience.items` con i 5 punti dal CV (VB.NET,
+  dashboard BI, Hyper-V/Docker su Linux, reti VPN + hardware in rete, automazione/integrazione).
+  Competenze: **VB.NET** aggiunto ai Linguaggi; nuovo gruppo **"BI & Infrastruttura"** (Power BI,
+  Apache Superset, Hyper-V, Docker); rimosso "AutoCAD Architecture" (non nel CV); nuovi tag
+  (Business Intelligence, Virtualizzazione, Reti & VPN, Patente B).
+- **PDF scaricabile**: nuovo `Giancarlo_crudele.pdf` copiato in `public/assets/cv-giancarlo-crudele.pdf`
+  (e `assets/`).
+- Verificato: build OK, preview OK (nuova foto + Tecno Quality nello stendardo Esperienza).
 
 ### 2026-07-06 (foresta attorno al villaggio) 🌲🌲
 Richiesta utente: bosco fitto che nasconda "la fine del mondo".

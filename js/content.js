@@ -79,6 +79,28 @@ const CONTENT = {
       subtitle: { it: "Le torri del lavoro", en: "The work towers" },
       items: [
         {
+          role: { it: "Sviluppatore di software", en: "Software Developer" },
+          org: "Tecno Quality",
+          place: { it: "Rutigliano, Italia", en: "Rutigliano, Italy" },
+          period: { it: "Dic 2025 – Attuale", en: "Dec 2025 – Present" },
+          desc: {
+            it: [
+              "Sviluppo e manutenzione di applicazioni gestionali in VB.NET.",
+              "Progettazione e personalizzazione di dashboard di Business Intelligence.",
+              "Gestione di infrastruttura virtualizzata: VM Hyper-V e container Docker su ambienti Linux.",
+              "Configurazione e troubleshooting di reti VPN e di dispositivi hardware in rete (es. stampanti per etichette).",
+              "Sviluppo di soluzioni di automazione e integrazione tra sistemi diversi."
+            ],
+            en: [
+              "Development and maintenance of business management applications in VB.NET.",
+              "Design and customization of Business Intelligence dashboards.",
+              "Virtualized infrastructure management: Hyper-V VMs and Docker containers on Linux.",
+              "Setup and troubleshooting of VPN networks and networked hardware (e.g. label printers).",
+              "Automation and integration solutions across different systems."
+            ]
+          }
+        },
+        {
           role: { it: "Software Engineer (Stage)", en: "Software Engineer (Internship)" },
           org: "Exprivia S.p.A.",
           place: { it: "Molfetta, Italia", en: "Molfetta, Italy" },
@@ -179,6 +201,7 @@ const CONTENT = {
           skills: [
             { name: "Java", level: 75 },
             { name: "C#", level: 70 },
+            { name: "VB.NET", level: 65 },
             { name: "C++", level: 60 },
             { name: "C", level: 55 }
           ]
@@ -198,14 +221,22 @@ const CONTENT = {
           skills: [
             { name: "SQL", level: 70 },
             { name: "NoSQL", level: 55 },
-            { name: "UML", level: 65 },
-            { name: "AutoCAD Architecture", level: 50 }
+            { name: "UML", level: 65 }
+          ]
+        },
+        {
+          name: { it: "BI & Infrastruttura", en: "BI & Infrastructure" },
+          skills: [
+            { name: "Power BI", level: 65 },
+            { name: "Apache Superset", level: 60 },
+            { name: "Hyper-V", level: 60 },
+            { name: "Docker", level: 55 }
           ]
         }
       ],
       tags: {
-        it: ["Microservizi", "Quality Assurance / JUnit", "Big Data & Cloud", "Intelligenza Artificiale", "Cybersecurity", "Project Management", "UX/UI"],
-        en: ["Microservices", "Quality Assurance / JUnit", "Big Data & Cloud", "Artificial Intelligence", "Cybersecurity", "Project Management", "UX/UI"]
+        it: ["Business Intelligence", "Virtualizzazione (Hyper-V/Docker)", "Reti & VPN", "Microservizi", "Quality Assurance / JUnit", "Big Data & Cloud", "Intelligenza Artificiale", "Cybersecurity", "Project Management", "UX/UI", "Patente B"],
+        en: ["Business Intelligence", "Virtualization (Hyper-V/Docker)", "Networking & VPN", "Microservices", "Quality Assurance / JUnit", "Big Data & Cloud", "Artificial Intelligence", "Cybersecurity", "Project Management", "UX/UI", "Driving licence B"]
       }
     },
 
