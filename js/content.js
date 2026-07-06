@@ -37,6 +37,7 @@ const CONTENT = {
                    en: "<b>WASD</b>/arrows to move · <b>E</b> to enter · <b>SPACE</b> to jump · drag to rotate · scroll to zoom" },
     welcomeBtn:  { it: "Inizia l'esplorazione ⚔️", en: "Start exploring ⚔️" },
     visited:     { it: "sezioni visitate",         en: "sections visited" },
+    petCat:      { it: "Accarezza il gatto 🐈‍⬛",   en: "Pet the cat 🐈‍⬛" },
     backToCity:  { it: "Torna alla città",        en: "Back to the city" },
     close:       { it: "Chiudi",                  en: "Close" },
     present:     { it: "Attuale",                 en: "Present" },

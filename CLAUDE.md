@@ -14,18 +14,12 @@
 > Aggiornare SEMPRE questa sezione con l'ultima cosa chiesta all'utente, così se cambia chat
 > si riprende esattamente da qui.
 
-**Domanda in sospeso (2026-07-05, notte):**
-✅ **PIATTAFORMA SCELTA: RENDER** (static site). Verificato: MCP Render collegato e funzionante
-(workspace "My Workspace", tea-d93ek4naqgkc73bqqpa0); `create_static_site` richiede un **repo Git**
-(GitHub) + buildCommand (`npm ci; npm run build`) + publishPath (`dist`). Sul PC: git ✓ installato,
-**gh CLI ✗ non installato**. Spiegato all'utente che NON serve comprare un dominio: Render dà
-gratis `https://<nome>.onrender.com` (CDN + HTTPS); dominio proprio = opzionale in seguito.
-**In attesa dall'utente:** (1) ha un account GitHub? (creare il repo a mano su github.com o
-installare gh via winget + login); (2) che nome dare al sito (= sottodominio .onrender.com,
-proposta: `giancarlo-crudele-cv`). Prima del deploy: archiviare il sito iso in `/_archivio-iso`
-(valutare se tenerlo linkato: l'utente ci tiene) e assolutizzare l'`og:image` in `3d/index.html`
-con l'URL onrender. NB per Render NON serve `base` in vite.config (serve solo per GitHub Pages).
-In attesa anche di eventuale scelta easter egg (proposta: tuffo in fontana o gatto).
+**Stato (2026-07-06):** 🎉 **SITO ONLINE!** → **https://giancarlo-crudele-cv.onrender.com**
+Deploy su Render completato (vedi changelog). Repo: https://github.com/Giga191/Giancarlo-Crudele-Curriculum
+(pubblico, branch `master`, auto-deploy attivo: ogni `git push` ripubblica da solo).
+✅ **Easter egg AGGIUNTI** (richiesti entrambi dall'utente): gatto nero da accarezzare +
+tuffo nella fontana con splash (vedi changelog 2026-07-06).
+**Nessuna domanda in sospeso.** Opzionale in futuro: dominio personalizzato (dashboard Render).
 
 *(Già confermato dall'utente: sì, ad ogni blocco di lavoro devo scrivere "CLAUDE.md aggiornato".)*
 
@@ -146,8 +140,9 @@ Resterà come archivio una volta pronto il 3D.
       crossfade), audio Web Audio (blip, off di default, pulsante 🔇/🔊), **giorno/notte** (pulsante
       🌙/☀️, lerp cielo/nebbia/luci + 4 PointLight sui lampioni), **"Salta al CV"** (`cv.html`
       accessibile/SEO, pulsante 📄 nell'HUD, link ritorno alla città).
-- [ ] **Deploy** (GitHub Pages / Netlify / Render) — in attesa di scelta piattaforma dall'utente.
-- [ ] Archiviare il sito iso in `/_archivio-iso` (al momento del deploy).
+- [x] ~~**Deploy**~~ ✅ 2026-07-06: **online su Render** → https://giancarlo-crudele-cv.onrender.com
+- [x] ~~Archiviare il sito iso in `/_archivio-iso`~~ ✅ 2026-07-06 (radice `/` = redirect alla città 3D).
+- [x] ~~Easter egg~~ ✅ 2026-07-06: fatti ENTRAMBI (gatto nero accarezzabile + tuffo in fontana con splash).
 
 ### Tarature in attesa di feedback utente
 - Velocità avatar (`SPEED` in `game.js`), zoom iso (`VIEW_HALF`, range rotella 9–26),
@@ -187,6 +182,47 @@ cinema, musica, moda. Scrive in italiano.
 ---
 
 ## 8. Changelog (aggiungere in cima, con data)
+
+### 2026-07-06 (easter egg: gatto nero + tuffo in fontana) 🐈‍⬛💦
+Richiesti entrambi dall'utente. Tutto in `game.js` (sezione 3b) + `content.js` (ui.petCat) + `game.css` (.heart):
+- **Gatto nero procedurale** (primitive THREE, niente GLB: corpo/testa/orecchie a cono/zampe/coda
+  in gruppo `tailG` animato, occhi verdi emissive → brillano di notte). **Vaga per la città**:
+  meta casuale `newCatTarget()` (r 8–42, mai in fontana), `resolveCollision` per gli ostacoli,
+  anti-incastro (stall>1.2s → nuova meta), rotazione fluida con `wrapAngle`, passetti su sin(t).
+- **Carezze**: entro 3.2 unità il prompt diventa "Accarezza il gatto 🐈‍⬛" (priorità sulla porta;
+  su mobile il pulsante Entra diventa 🐾) → **E**/tap = `petCat()`: gatto fermo 2.4s girato verso
+  il giocatore, coda felice, **fusa** (`Sound.purr`, 3 blip sawtooth bassi) e **3 cuoricini DOM**
+  (proiezione camera → div.heart con animazione heart-float).
+- **Tuffo in fontana**: collider fontana marcato `fountain:true`; `resolveCollision(pos,
+  ignoreFountain)` lo salta se in volo o già dentro → si entra SOLO saltando, dentro ci si
+  muove e si esce camminando (il bordo respinge solo da fuori). All'atterraggio in acqua
+  (dist<4.2) → `doSplash`: **26 gocce** (sfere azzurre, fisica con gravità, scala=vita 0.9s)
+  + `Sound.splash` (rumore bianco filtrato lowpass in dissolvenza).
+- `__dbg` esteso (doSplash, petCat, cat, splashCount). Verificato headless: prompt gatto,
+  pet+cuori, tuffo (dentroFontana+aTerra+26 schizzi), 0 errori, build OK. NB: negli screenshot
+  headless può comparire un riquadro-fantasma da VRAM non inizializzata (artefatto GPU, non è un bug).
+
+### 2026-07-06 (DEPLOY SU RENDER) 🚀
+**Il sito è online: https://giancarlo-crudele-cv.onrender.com** (CDN + HTTPS gratis di Render;
+dominio proprio non necessario, agganciabile in futuro dal dashboard). Passi fatti:
+- **Pre-deploy**: sito iso 2.5D spostato in `/_archivio-iso` (con README; `js/content.js` resta
+  in `js/` perché condiviso con 3D e cv.html); nuova **`index.html` radice = redirect a `/3d/`**
+  (meta refresh + `location.replace`, con og-meta e link fallback a città/CV); `vite.config.js`
+  aggiornato (input: home/city3d/cv → build senza più warning); **og:url/og:image assoluti**
+  in `3d/index.html` e nella radice. Verificato redirect nel preview e build pulita.
+- **Git/GitHub**: `git init` + commit iniziale (71 file); installata **gh CLI 2.96 via winget**;
+  login `gh auth login --web` fatto dall'utente in una finestra dedicata (Start-Process, con
+  watcher in background che aspetta `gh auth status` ok — il primo watcher da 6 min è scaduto,
+  al secondo tentativo da 30 min l'utente ha completato). Account GitHub: **Giga191** (identità
+  git già configurata sul PC). Repo **pubblico**: https://github.com/Giga191/Giancarlo-Crudele-Curriculum
+  (il nome richiesto "Giancarlo Crudele Curriculum" ha gli spazi → GitHub non li ammette, usati i trattini).
+- **Render** (MCP, workspace "My Workspace"): `create_static_site` name=`giancarlo-crudele-cv`,
+  branch master, build `npm ci && npm run build`, publishPath `dist`, **auto-deploy on commit**
+  (ogni push su master ripubblica da solo). Servizio: srv-d95vusfavr4c73cbhuk0
+  (dashboard: https://dashboard.render.com/static/srv-d95vusfavr4c73cbhuk0).
+- **Verificato online**: 200 su `/`, `/3d/`, `/cv.html`, `/og-image.png`. Primo deploy live in ~19s.
+- NB il MCP Render a inizio sessione può richiedere di riselezionare il workspace:
+  basta chiamare `list_workspaces` (uno solo → si autoseleziona).
 
 ### 2026-07-05 notte (fix portale del castello) 🏰
 Segnalazione utente: una parte del castello Esperienza era sbagliata. Era il **portale**:

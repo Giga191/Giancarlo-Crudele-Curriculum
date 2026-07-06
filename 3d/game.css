@@ -191,6 +191,16 @@ body.touch .joystick { display: block; }
 body.touch .jump-btn-mobile { display: block; } /* sempre visibile su touch (il salto non dipende dalle porte) */
 body.touch .controls-hint { display: none; }
 
+/* Cuoricini del gatto (easter egg): salgono e svaniscono */
+.heart {
+  position: fixed; z-index: 24; font-size: 1.35rem; pointer-events: none;
+  animation: heart-float 1.15s ease-out forwards;
+}
+@keyframes heart-float {
+  from { opacity: 1; transform: translate(-50%, 0) scale(0.7); }
+  to   { opacity: 0; transform: translate(-50%, -72px) scale(1.3); }
+}
+
 /* =========================================================================
    STENDARDO (overlay del CV)
    ========================================================================= */

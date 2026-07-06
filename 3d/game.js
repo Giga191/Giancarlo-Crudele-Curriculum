@@ -40,6 +40,25 @@ const Sound = {
   },
   open()  { this.blip(660, 0.14, "triangle", 0.07); setTimeout(() => this.blip(880, 0.12, "triangle", 0.05), 80); },
   click() { this.blip(440, 0.09, "sine", 0.05); },
+  /* fusa del gatto: tre brevi vibrati bassi */
+  purr()  { this.blip(170, 0.1, "sawtooth", 0.04); setTimeout(() => this.blip(140, 0.1, "sawtooth", 0.04), 100); setTimeout(() => this.blip(170, 0.14, "sawtooth", 0.04), 200); },
+  /* splash: burst di rumore bianco filtrato passa-basso in dissolvenza */
+  splash() {
+    if (!this.on) return;
+    try {
+      this.ensure();
+      if (this.ctx.state === "suspended") this.ctx.resume();
+      const n = Math.floor(this.ctx.sampleRate * 0.35);
+      const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      const src = this.ctx.createBufferSource(); src.buffer = buf;
+      const f = this.ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 900;
+      const g = this.ctx.createGain(); g.gain.value = 0.22;
+      src.connect(f); f.connect(g); g.connect(this.ctx.destination);
+      src.start();
+    } catch { /* audio non disponibile */ }
+  },
   toggle() { this.on = !this.on; localStorage.setItem("sound", this.on ? "on" : "off"); return this.on; }
 };
 
@@ -188,7 +207,7 @@ function buildCity() {
   // fontana + lampioni + panchine in piazza
   const plazaProps = buildPlaza();
   scene.add(plazaProps.group);
-  colliders.push({ x: 0, z: 0, r: 4.2 }); // fontana
+  colliders.push({ x: 0, z: 0, r: 4.2, fountain: true }); // fontana (scavalcabile col salto!)
   plazaProps.benches.forEach(([x, z]) => colliders.push({ x, z, r: 0.8 }));
   plazaProps.lanterns.forEach(([x, z]) => {
     colliders.push({ x, z, r: 0.6 });
@@ -270,12 +289,127 @@ function tryJump() {
 }
 
 /* =========================================================================
+   3b) EASTER EGG — gatto nero + tuffo nella fontana
+   ========================================================================= */
+
+/* Gatto nero low-poly costruito con primitive (in tono col villaggio Kenney) */
+let cat = null, nearCat = false;
+const CAT_SPEED = 2.4;
+function buildCat() {
+  const g = new THREE.Group();
+  const fur = new THREE.MeshStandardMaterial({ color: "#161616", roughness: 0.9 });
+  const eyeMat = new THREE.MeshStandardMaterial({ color: "#37e06e", emissive: "#37e06e", emissiveIntensity: 0.8 });
+  const add = m => { m.castShadow = true; g.add(m); return m; };
+  const body = add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.42, 0.95), fur)); body.position.y = 0.45;
+  const head = add(new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.38, 0.38), fur)); head.position.set(0, 0.74, 0.52);
+  for (const s of [-1, 1]) {
+    const ear = add(new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.18, 4), fur));
+    ear.position.set(s * 0.13, 0.99, 0.5);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 6), eyeMat);
+    eye.position.set(s * 0.1, 0.76, 0.72); g.add(eye); // occhi verdi (luminosi in notturna)
+    for (const fz of [-1, 1]) {
+      const leg = add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), fur));
+      leg.position.set(s * 0.16, 0.15, fz * 0.33);
+    }
+  }
+  const tailG = new THREE.Group(); tailG.position.set(0, 0.62, -0.48);
+  const tail = add(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.5), fur));
+  tail.position.z = -0.25; tailG.add(tail); g.add(tailG);
+  g.position.set(10, 0, 14);
+  return { group: g, tail: tailG, target: null, idle: 0, pet: 0, stall: 0 };
+}
+
+function newCatTarget() {
+  for (let i = 0; i < 12; i++) {
+    const a = Math.random() * Math.PI * 2, r = 8 + Math.random() * 34;
+    const x = Math.cos(a) * r, z = Math.sin(a) * r;
+    if (Math.hypot(x, z) > 6) return new THREE.Vector3(x, 0, z); // mai in fontana: i gatti odiano l'acqua
+  }
+  return new THREE.Vector3(12, 0, 12);
+}
+
+const wrapAngle = d => { while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; };
+
+function updateCat(dt) {
+  const g = cat.group, t = clock.elapsedTime;
+  if (cat.pet > 0) { // coccole: fermo, si gira verso il giocatore, coda felice
+    cat.pet -= dt;
+    cat.tail.rotation.y = Math.sin(t * 14) * 0.6;
+    const ry = Math.atan2(player.position.x - g.position.x, player.position.z - g.position.z);
+    g.rotation.y += wrapAngle(ry - g.rotation.y) * Math.min(1, dt * 8);
+    g.position.y = 0;
+    return;
+  }
+  cat.tail.rotation.y = Math.sin(t * 3.5) * 0.35;
+  if (cat.idle > 0) { cat.idle -= dt; g.position.y = 0; return; }
+  if (!cat.target) { cat.target = newCatTarget(); cat.stall = 0; }
+  const d = new THREE.Vector3().subVectors(cat.target, g.position); d.y = 0;
+  const dist = d.length();
+  if (dist < 0.7) { cat.target = null; cat.idle = 1.5 + Math.random() * 3; return; }
+  d.normalize();
+  const step = Math.min(CAT_SPEED * dt, dist);
+  const next = g.position.clone().addScaledVector(d, step);
+  next.y = 0;
+  resolveCollision(next);            // il gatto rispetta gli ostacoli (fontana compresa)
+  const moved = next.distanceTo(g.position);
+  g.position.copy(next);
+  cat.stall = moved < step * 0.4 ? cat.stall + dt : 0; // incastrato contro un muro?
+  if (cat.stall > 1.2) { cat.target = null; cat.stall = 0; }
+  g.rotation.y += wrapAngle(Math.atan2(d.x, d.z) - g.rotation.y) * Math.min(1, dt * 6);
+  g.position.y = Math.abs(Math.sin(t * 9)) * 0.05; // passetti
+}
+
+function petCat() {
+  if (!cat || bannerOpen || entering || cat.pet > 0) return;
+  if (cat.group.position.distanceTo(player.position) > 3.4) return;
+  cat.pet = 2.4;
+  cat.target = null;
+  Sound.purr();
+  // cuoricini che salgono sopra il gatto (overlay DOM)
+  const v = cat.group.position.clone(); v.y += 1.3; v.project(camera);
+  const hx = (v.x * 0.5 + 0.5) * innerWidth, hy = (-v.y * 0.5 + 0.5) * innerHeight;
+  for (let i = 0; i < 3; i++) setTimeout(() => {
+    const h = document.createElement("div");
+    h.className = "heart"; h.textContent = "❤️";
+    h.style.left = (hx + (Math.random() - 0.5) * 44) + "px";
+    h.style.top = hy + "px";
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 1200);
+  }, i * 220);
+}
+
+/* Splash della fontana: schizzi d'acqua a fisica semplice, scala = vita residua */
+const splashes = [];
+const splashGeo = new THREE.SphereGeometry(0.1, 6, 5);
+const splashMat = new THREE.MeshStandardMaterial({ color: "#bfe6ff", roughness: 0.25 });
+function doSplash(x, z) {
+  Sound.splash();
+  for (let i = 0; i < 26; i++) {
+    const m = new THREE.Mesh(splashGeo, splashMat);
+    m.position.set(x + (Math.random() - 0.5) * 0.6, 0.5, z + (Math.random() - 0.5) * 0.6);
+    const a = Math.random() * Math.PI * 2, r = 1.2 + Math.random() * 2.4;
+    splashes.push({ m, vx: Math.cos(a) * r, vy: 4 + Math.random() * 3.5, vz: Math.sin(a) * r, life: 0.9 });
+    scene.add(m);
+  }
+}
+function updateSplashes(dt) {
+  for (let i = splashes.length - 1; i >= 0; i--) {
+    const s = splashes[i];
+    s.vy -= 14 * dt;
+    s.m.position.x += s.vx * dt; s.m.position.y += s.vy * dt; s.m.position.z += s.vz * dt;
+    s.life -= dt;
+    s.m.scale.setScalar(Math.max(s.life, 0.01));
+    if (s.life <= 0 || s.m.position.y < 0) { scene.remove(s.m); splashes.splice(i, 1); }
+  }
+}
+
+/* =========================================================================
    4) INPUT  (tastiera, mouse-drag, joystick)
    ========================================================================= */
 const keys = {};
 addEventListener("keydown", e => {
   keys[e.code] = true;
-  if (e.code === "KeyE") tryEnter();
+  if (e.code === "KeyE") { if (nearCat) petCat(); else tryEnter(); }
   if (e.code === "Space") { e.preventDefault(); tryJump(); } // preventDefault: niente "click" sui pulsanti HUD a fuoco
   if (e.code === "Escape") closeBanner();
 });
@@ -347,7 +481,7 @@ if (isTouch) document.body.classList.add("touch");
   addEventListener("pointermove", e => active && move(e));
   addEventListener("pointerup", end);
 })();
-$("#enter-btn-mobile").addEventListener("click", tryEnter);
+$("#enter-btn-mobile").addEventListener("click", () => { if (nearCat) petCat(); else tryEnter(); });
 $("#jump-btn-mobile").addEventListener("pointerdown", e => { e.stopPropagation(); tryJump(); }); // pointerdown: reattivo e non avvia il drag-camera
 
 /* =========================================================================
@@ -355,16 +489,19 @@ $("#jump-btn-mobile").addEventListener("pointerdown", e => { e.stopPropagation()
    ========================================================================= */
 const clock = new THREE.Clock();
 const SPEED = 8;
-if (import.meta.env.DEV) window.__dbg = { player, camera, scene, colliders, resolveCollision, tryJump, setYaw: v => { cameraYaw = v; }, get grounded() { return grounded; } }; // ispezione in sviluppo
+if (import.meta.env.DEV) window.__dbg = { player, camera, scene, colliders, resolveCollision, tryJump, doSplash, petCat, setYaw: v => { cameraYaw = v; }, get grounded() { return grounded; }, get cat() { return cat; }, get splashCount() { return splashes.length; } }; // ispezione in sviluppo
 let facing = 0;
 let nearDoor = null;
 const prompt = $("#prompt"), promptText = $("#prompt-text"), enterBtnM = $("#enter-btn-mobile");
 const tmp = new THREE.Vector3();
 
 /* Collisioni precise: cerchi (alberi, fontana, lampioni) e OBB
-   (rettangoli ORIENTATI: gli edifici sono ruotati verso la piazza) */
-function resolveCollision(pos) {
+   (rettangoli ORIENTATI: gli edifici sono ruotati verso la piazza).
+   ignoreFountain: in volo (o già in acqua) il bordo fontana non respinge —
+   è così che ci si tuffa dentro e se ne esce camminando. */
+function resolveCollision(pos, ignoreFountain = false) {
   for (const c of colliders) {
+    if (c.fountain && ignoreFountain) continue;
     if (c.r) { // cerchio: spingi fuori radialmente
       const dx = pos.x - c.x, dz = pos.z - c.z;
       const dist = Math.hypot(dx, dz);
@@ -408,10 +545,13 @@ function update(dt) {
     .addScaledVector(fwd, iz).addScaledVector(right, ix);
   const moving = move.lengthSq() > 0.001;
 
+  // dentro la fontana (o in volo) il suo bordo non respinge: tuffo e uscita liberi
+  const inFountain = Math.hypot(player.position.x, player.position.z) < 4.2;
+
   if (moving) {
     move.normalize().multiplyScalar(SPEED * dt);
     const next = player.position.clone().add(move);
-    resolveCollision(next);
+    resolveCollision(next, !grounded || inFountain);
     player.position.copy(next);
     facing = Math.atan2(move.x, move.z);
   }
@@ -426,12 +566,19 @@ function update(dt) {
     player.position.y += vy * dt;
     if (player.position.y <= 0) {
       player.position.y = 0; vy = 0; grounded = true;
+      // atterraggio in fontana → SPLASH! 💦
+      if (Math.hypot(player.position.x, player.position.z) < 4.2)
+        doSplash(player.position.x, player.position.z);
       if (actJump) {
         actJump.fadeOut(0.12);
         (moving ? actMove : actIdle).reset().fadeIn(0.12).play();
       }
     }
   }
+
+  // easter egg: gatto a spasso + schizzi della fontana
+  if (cat) updateCat(dt);
+  updateSplashes(dt);
 
   // animazioni del cavaliere: dissolvenza idle ↔ corsa (in aria comanda il salto)
   if (mixer) {
@@ -458,10 +605,17 @@ function update(dt) {
     const dist = player.position.distanceTo(d.pos);
     if (dist < best) { best = dist; nearDoor = d; }
   }
-  if (nearDoor && !bannerOpen) {
+  // gatto nelle vicinanze? (ha la precedenza sulla porta)
+  nearCat = !!cat && !bannerOpen && cat.group.position.distanceTo(player.position) < 3.2;
+
+  if (nearCat) {
+    promptText.textContent = L(CONTENT.ui.petCat);
+    prompt.classList.add("show");
+    if (isTouch) { enterBtnM.textContent = "🐾"; enterBtnM.classList.add("show"); }
+  } else if (nearDoor && !bannerOpen) {
     promptText.textContent = "Entra · " + L(CONTENT.sections[nearDoor.sectionId].title);
     prompt.classList.add("show");
-    if (isTouch) enterBtnM.classList.add("show");
+    if (isTouch) { enterBtnM.textContent = "Entra"; enterBtnM.classList.add("show"); }
   } else {
     prompt.classList.remove("show");
     enterBtnM.classList.remove("show");
@@ -638,6 +792,8 @@ Promise.all([
   loadAvatar()
 ]).then(() => {
   buildCity();
+  cat = buildCat();          // 🐈‍⬛ easter egg: il gatto entra in scena
+  scene.add(cat.group);
   setLang(LANG); // riallinea le etichette appena create alla lingua attiva
   $("#loader").classList.add("hidden");
   loop();
