@@ -21,8 +21,8 @@ Deploy su Render completato (vedi changelog). Repo: https://github.com/Giga191/G
 tuffo nella fontana con splash (vedi changelog 2026-07-06).
 ✅ **Rifiniture del 2026-07-06**: fix collisioni fontana (+zampillo solido, acqua che rallenta),
 gatto con animazioni articolate (siede, trotta, si guarda intorno, sbatte le palpebre),
-suoni dei passi (con sciacquettio in acqua). **Non ancora committato/pushato**: chiedere
-all'utente se pubblicare (git push → auto-deploy Render).
+suoni dei passi (con sciacquettio in acqua), splash a 3 strati. **Pushate e ONLINE**
+(commit fb96e97, deploy Render live e verificato nel bundle pubblicato).
 **Nessuna domanda in sospeso.** Opzionale in futuro: dominio personalizzato (dashboard Render).
 
 *(Già confermato dall'utente: sì, ad ogni blocco di lavoro devo scrivere "CLAUDE.md aggiornato".)*
@@ -186,6 +186,20 @@ cinema, musica, moda. Scrive in italiano.
 ---
 
 ## 8. Changelog (aggiungere in cima, con data)
+
+### 2026-07-06 (foresta attorno al villaggio) 🌲🌲
+Richiesta utente: bosco fitto che nasconda "la fine del mondo".
+- **`buildForest()` in buildings.js**: ~900 alberi in 9 anelli concentrici (r 50→88, un albero
+  ogni ~4.2 unità con jitter, scala 0.85–1.4·K, 2 varianti Kenney) — ma **InstancedMesh**:
+  una sola mesh istanziata per ogni mesh dei 2 modelli albero → pochi draw call, va bene
+  anche su mobile. PRNG **LCG seminato** = layout deterministico. ⚠️ `frustumCulled=false`
+  sulle InstancedMesh (il bounding della geometria singola non copre il bosco → sparirebbero).
+- **game.js**: terreno 180→**500** (oltre la nebbia: il bordo del piano non si vede più
+  nemmeno a zoom max), **confine mondo circolare r=54** in `resolveCollision` (sostituisce il
+  clamp box ±78; si cammina tra le prime file del bosco ma non si sfonda), **collider (r 1.1)
+  solo sulle prime 2 file** (~156, le uniche raggiungibili) → 186 collider totali, costo irrisorio.
+- Verificato headless: panoramica zoom max senza orizzonte visibile, vista dal confine ok,
+  clamp a 54.00 esatto, 0 errori console. Build OK.
 
 ### 2026-07-06 (splash della fontana migliorato) 🔊💦
 `Sound.splash()` rifatto in **3 strati** (prima: singolo burst di rumore lowpass):

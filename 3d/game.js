@@ -9,7 +9,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import "../js/content.js"; // definisce window.CONTENT (fonte unica dei testi CV)
-import { preloadModels, buildDistrict, buildTree, buildPlaza, buildRoad } from "./buildings.js";
+import { preloadModels, buildDistrict, buildTree, buildPlaza, buildRoad, buildForest } from "./buildings.js";
 
 const CONTENT = window.CONTENT;
 let LANG = localStorage.getItem("lang") || "it";
@@ -155,7 +155,7 @@ scene.add(sun);
 
 /* terreno + piazza centrale */
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(180, 180),
+  new THREE.PlaneGeometry(500, 500), // ben oltre la nebbia: il bordo del mondo non si vede mai
   new THREE.MeshStandardMaterial({ color: "#6fae54" })
 );
 ground.rotation.x = -Math.PI / 2;
@@ -258,6 +258,12 @@ function buildCity() {
     scene.add(t);
     colliders.push({ x: p[0], z: p[1], r: 1.1 });
   });
+
+  // foresta fitta attorno al villaggio (chiude l'orizzonte); collider solo
+  // sulle prime 2 file: oltre non ci si arriva (confine mondo r=54)
+  const forest = buildForest();
+  scene.add(forest.group);
+  forest.inner.forEach(([x, z]) => colliders.push({ x, z, r: 1.1 }));
 
   // fontana + lampioni + panchine in piazza
   const plazaProps = buildPlaza();
@@ -629,8 +635,9 @@ function resolveCollision(pos, ignoreFountain = false) {
       }
     }
   }
-  pos.x = Math.max(-78, Math.min(78, pos.x));
-  pos.z = Math.max(-78, Math.min(78, pos.z));
+  // confine del mondo: cerchio dentro la foresta (si cammina tra le prime file)
+  const rr = Math.hypot(pos.x, pos.z);
+  if (rr > 54) { pos.x *= 54 / rr; pos.z *= 54 / rr; }
 }
 
 let wasMoving = false, stepT = 0;

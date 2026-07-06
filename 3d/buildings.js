@@ -247,6 +247,61 @@ export function buildTree(i = 0) {
   return t;
 }
 
+/* =========================================================================
+   FORESTA — anelli concentrici di alberi ISTANZIATI attorno al villaggio,
+   abbastanza fitti da chiudere l'orizzonte ("la fine del mondo").
+   ~900 alberi ma pochissimi draw call: per ogni mesh dei 2 modelli albero
+   si crea UNA InstancedMesh con le matrici di tutte le sue istanze.
+   PRNG seminato (LCG): layout deterministico, stesso bosco a ogni visita.
+   Ritorna { group, inner } — inner = tronchi delle prime 2 file, le uniche
+   raggiungibili camminando (per i collider in game.js).
+   ========================================================================= */
+export function buildForest(rStart = 50, rEnd = 88, seed = 7) {
+  let s = seed >>> 0;
+  const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+
+  // 1) posizioni: anelli sfalsati, un albero ogni ~4.2 unità lungo l'anello
+  const placements = [[], []]; // per i 2 tipi di albero
+  const inner = [];
+  let ringIdx = 0;
+  for (let R = rStart; R <= rEnd; R += 4.3, ringIdx++) {
+    const n = Math.round((2 * Math.PI * R) / 4.2);
+    const a0 = rnd() * Math.PI * 2;
+    for (let i = 0; i < n; i++) {
+      const a = a0 + (i + (rnd() - 0.5) * 0.6) * (2 * Math.PI / n);
+      const rr = R + (rnd() - 0.5) * 2.6;
+      const p = { x: Math.cos(a) * rr, z: Math.sin(a) * rr,
+                  rot: rnd() * Math.PI * 2, s: K * (0.85 + rnd() * 0.55) };
+      placements[rnd() < 0.45 ? 1 : 0].push(p);
+      if (ringIdx < 2) inner.push([p.x, p.z]);
+    }
+  }
+
+  // 2) una InstancedMesh per ogni mesh dei modelli albero
+  const group = new THREE.Group();
+  const M = new THREE.Matrix4(), Q = new THREE.Quaternion();
+  const V = new THREE.Vector3(), SC = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
+  ["town/tree", "town/tree-high-round"].forEach((path, ti) => {
+    const src = lib.get(path);
+    src.updateMatrixWorld(true);
+    const list = placements[ti];
+    src.traverse(o => {
+      if (!o.isMesh) return;
+      const im = new THREE.InstancedMesh(o.geometry, o.material, list.length);
+      im.castShadow = true; im.receiveShadow = true;
+      im.frustumCulled = false; // il bounding della singola geometria non copre il bosco intero
+      list.forEach((p, i) => {
+        Q.setFromAxisAngle(UP, p.rot);
+        M.compose(V.set(p.x, 0, p.z), Q, SC.setScalar(p.s)).multiply(o.matrixWorld);
+        im.setMatrixAt(i, M);
+      });
+      im.instanceMatrix.needsUpdate = true;
+      group.add(im);
+    });
+  });
+  return { group, inner };
+}
+
 /* strada radiale: dalla piazza fino a `clearance` unità mondo dal target */
 export function buildRoad(target, clearance) {
   const g = new THREE.Group();
