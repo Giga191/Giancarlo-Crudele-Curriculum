@@ -42,19 +42,74 @@ const Sound = {
   click() { this.blip(440, 0.09, "sine", 0.05); },
   /* fusa del gatto: tre brevi vibrati bassi */
   purr()  { this.blip(170, 0.1, "sawtooth", 0.04); setTimeout(() => this.blip(140, 0.1, "sawtooth", 0.04), 100); setTimeout(() => this.blip(170, 0.14, "sawtooth", 0.04), 200); },
-  /* splash: burst di rumore bianco filtrato passa-basso in dissolvenza */
+  /* splash in 3 strati: tonfo d'impatto (sinusoide che affonda) + corpo dello
+     splash (rumore col filtro che si apre "sciaff" e si richiude) + goccioline
+     che ricadono ("plin" sparsi nel mezzo secondo successivo) */
   splash() {
     if (!this.on) return;
     try {
       this.ensure();
       if (this.ctx.state === "suspended") this.ctx.resume();
-      const n = Math.floor(this.ctx.sampleRate * 0.35);
+      const t0 = this.ctx.currentTime, out = this.ctx.destination;
+
+      // 1) tonfo: il "gluck" grave del corpo che buca l'acqua
+      const o = this.ctx.createOscillator(), og = this.ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(260, t0);
+      o.frequency.exponentialRampToValueAtTime(70, t0 + 0.18);
+      og.gain.setValueAtTime(0.25, t0);
+      og.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
+      o.connect(og); og.connect(out);
+      o.start(t0); o.stop(t0 + 0.25);
+
+      // 2) corpo: rumore in dissolvenza, bandpass che sale e ridiscende
+      const dur = 0.7, n = Math.floor(this.ctx.sampleRate * dur);
+      const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.6);
+      const src = this.ctx.createBufferSource(); src.buffer = buf;
+      const f = this.ctx.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 0.8;
+      f.frequency.setValueAtTime(500, t0);
+      f.frequency.exponentialRampToValueAtTime(2600, t0 + 0.08);
+      f.frequency.exponentialRampToValueAtTime(700, t0 + dur);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      src.connect(f); f.connect(g); g.connect(out);
+      src.start(t0);
+
+      // 3) goccioline: 5 "plin" acuti a tempi e altezze casuali
+      for (let i = 0; i < 5; i++) {
+        const dt = 0.15 + Math.random() * 0.4, fr = 900 + Math.random() * 900;
+        const po = this.ctx.createOscillator(), pg = this.ctx.createGain();
+        po.type = "sine";
+        po.frequency.setValueAtTime(fr, t0 + dt);
+        po.frequency.exponentialRampToValueAtTime(fr * 0.6, t0 + dt + 0.06);
+        pg.gain.setValueAtTime(0, t0 + dt);
+        pg.gain.linearRampToValueAtTime(0.045, t0 + dt + 0.01);
+        pg.gain.exponentialRampToValueAtTime(0.0001, t0 + dt + 0.09);
+        po.connect(pg); pg.connect(out);
+        po.start(t0 + dt); po.stop(t0 + dt + 0.12);
+      }
+    } catch { /* audio non disponibile */ }
+  },
+  /* passo: tonfo di rumore filtrato passa-basso; in acqua diventa uno sciacquettio */
+  step(inWater = false) {
+    if (!this.on) return;
+    try {
+      this.ensure();
+      if (this.ctx.state === "suspended") this.ctx.resume();
+      const dur = inWater ? 0.1 : 0.055;
+      const n = Math.floor(this.ctx.sampleRate * dur);
       const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
       const d = buf.getChannelData(0);
       for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
       const src = this.ctx.createBufferSource(); src.buffer = buf;
-      const f = this.ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 900;
-      const g = this.ctx.createGain(); g.gain.value = 0.22;
+      const f = this.ctx.createBiquadFilter();
+      f.type = inWater ? "bandpass" : "lowpass";
+      f.frequency.value = inWater ? 1300 : 300 + Math.random() * 140; // ogni passo un po' diverso
+      const g = this.ctx.createGain(); g.gain.value = inWater ? 0.12 : 0.08;
       src.connect(f); f.connect(g); g.connect(this.ctx.destination);
       src.start();
     } catch { /* audio non disponibile */ }
@@ -207,7 +262,8 @@ function buildCity() {
   // fontana + lampioni + panchine in piazza
   const plazaProps = buildPlaza();
   scene.add(plazaProps.group);
-  colliders.push({ x: 0, z: 0, r: 4.2, fountain: true }); // fontana (scavalcabile col salto!)
+  colliders.push({ x: 0, z: 0, r: 4.2, fountain: true }); // bordo fontana (scavalcabile col salto!)
+  colliders.push({ x: 0, z: 0, r: 1.1 });                 // zampillo centrale: solido anche dentro l'acqua
   plazaProps.benches.forEach(([x, z]) => colliders.push({ x, z, r: 0.8 }));
   plazaProps.lanterns.forEach(([x, z]) => {
     colliders.push({ x, z, r: 0.6 });
@@ -278,6 +334,10 @@ function loadAvatar() {
 /* ---- salto: piccola fisica verticale (gravità + velocità iniziale) ---- */
 const JUMP_V = 9.5, GRAVITY = 26;   // apice ≈ 1.7 unità, in aria ≈ 0.73 s
 let vy = 0, grounded = true;
+/* in acqua: ci si entra SOLO atterrando dentro la fontana (tuffo); lo stato ha
+   isteresi (si spegne oltre r=4.45) così il collider del bordo non "sfarfalla"
+   quando il push-out lascia il giocatore a un pelo dal raggio (bug float). */
+let inWater = false;
 function tryJump() {
   if (!grounded || bannerOpen || entering) return;
   grounded = false; vy = JUMP_V;
@@ -292,31 +352,46 @@ function tryJump() {
    3b) EASTER EGG — gatto nero + tuffo nella fontana
    ========================================================================= */
 
-/* Gatto nero low-poly costruito con primitive (in tono col villaggio Kenney) */
+/* Gatto nero low-poly costruito con primitive (in tono col villaggio Kenney).
+   Il TORSO ha il perno sull'anca posteriore: inclinandolo, il gatto si SIEDE.
+   Le zampe hanno il perno all'anca (geometria traslata) e trottano in diagonale;
+   la TESTA è un gruppo mobile (si guarda intorno, si gode le coccole). */
 let cat = null, nearCat = false;
 const CAT_SPEED = 2.4;
 function buildCat() {
   const g = new THREE.Group();
   const fur = new THREE.MeshStandardMaterial({ color: "#161616", roughness: 0.9 });
   const eyeMat = new THREE.MeshStandardMaterial({ color: "#37e06e", emissive: "#37e06e", emissiveIntensity: 0.8 });
-  const add = m => { m.castShadow = true; g.add(m); return m; };
-  const body = add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.42, 0.95), fur)); body.position.y = 0.45;
-  const head = add(new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.38, 0.38), fur)); head.position.set(0, 0.74, 0.52);
+  const mesh = (geo, mat = fur) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; return m; };
+
+  const torso = new THREE.Group(); torso.position.set(0, 0.30, -0.33); g.add(torso);
+  const body = mesh(new THREE.BoxGeometry(0.5, 0.42, 0.95)); body.position.set(0, 0.15, 0.33); torso.add(body);
+
+  const head = new THREE.Group(); head.position.set(0, 0.44, 0.85); torso.add(head);
+  head.add(mesh(new THREE.BoxGeometry(0.4, 0.38, 0.38)));
+  const eyes = [];
   for (const s of [-1, 1]) {
-    const ear = add(new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.18, 4), fur));
-    ear.position.set(s * 0.13, 0.99, 0.5);
+    const ear = mesh(new THREE.ConeGeometry(0.09, 0.18, 4)); ear.position.set(s * 0.13, 0.25, -0.02); head.add(ear);
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 6), eyeMat);
-    eye.position.set(s * 0.1, 0.76, 0.72); g.add(eye); // occhi verdi (luminosi in notturna)
-    for (const fz of [-1, 1]) {
-      const leg = add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), fur));
-      leg.position.set(s * 0.16, 0.15, fz * 0.33);
-    }
+    eye.position.set(s * 0.1, 0.02, 0.20); head.add(eye); eyes.push(eye); // occhi verdi (luminosi in notturna)
   }
-  const tailG = new THREE.Group(); tailG.position.set(0, 0.62, -0.48);
-  const tail = add(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.5), fur));
-  tail.position.z = -0.25; tailG.add(tail); g.add(tailG);
+
+  const legGeo = new THREE.BoxGeometry(0.1, 0.3, 0.1); legGeo.translate(0, -0.15, 0); // perno all'anca
+  const legs = [];
+  for (const s of [-1, 1]) for (const fz of [-1, 1]) {
+    const leg = mesh(legGeo);
+    leg.position.set(s * 0.16, 0, fz * 0.33 + 0.33);
+    legs.push({ m: leg, front: fz > 0, phase: s * fz > 0 ? 0 : Math.PI }); // trotto: diagonali in fase
+    torso.add(leg);
+  }
+
+  const tailG = new THREE.Group(); tailG.position.set(0, 0.32, -0.15);
+  const tail = mesh(new THREE.BoxGeometry(0.07, 0.07, 0.5));
+  tail.position.z = -0.25; tailG.add(tail); torso.add(tailG);
+
   g.position.set(10, 0, 14);
-  return { group: g, tail: tailG, target: null, idle: 0, pet: 0, stall: 0 };
+  return { group: g, torso, head, eyes, legs, tail: tailG,
+           target: null, idle: 0, pet: 0, stall: 0, sitT: 0, blinkT: 2 };
 }
 
 function newCatTarget() {
@@ -332,31 +407,63 @@ const wrapAngle = d => { while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.
 
 function updateCat(dt) {
   const g = cat.group, t = clock.elapsedTime;
-  if (cat.pet > 0) { // coccole: fermo, si gira verso il giocatore, coda felice
+  let moving = false;
+
+  if (cat.pet > 0) { // coccole: si siede girato verso il giocatore
     cat.pet -= dt;
-    cat.tail.rotation.y = Math.sin(t * 14) * 0.6;
     const ry = Math.atan2(player.position.x - g.position.x, player.position.z - g.position.z);
     g.rotation.y += wrapAngle(ry - g.rotation.y) * Math.min(1, dt * 8);
-    g.position.y = 0;
-    return;
+  } else if (cat.idle > 0) { // pausa: si siede e si guarda intorno
+    cat.idle -= dt;
+  } else { // a spasso verso la meta
+    if (!cat.target) { cat.target = newCatTarget(); cat.stall = 0; }
+    const d = new THREE.Vector3().subVectors(cat.target, g.position); d.y = 0;
+    const dist = d.length();
+    if (dist < 0.7) { cat.target = null; cat.idle = 1.5 + Math.random() * 3; }
+    else {
+      d.normalize();
+      const step = Math.min(CAT_SPEED * dt, dist);
+      const next = g.position.clone().addScaledVector(d, step);
+      next.y = 0;
+      resolveCollision(next);            // il gatto rispetta gli ostacoli (fontana compresa)
+      const moved = next.distanceTo(g.position);
+      g.position.copy(next);
+      cat.stall = moved < step * 0.4 ? cat.stall + dt : 0; // incastrato contro un muro?
+      if (cat.stall > 1.2) { cat.target = null; cat.stall = 0; }
+      g.rotation.y += wrapAngle(Math.atan2(d.x, d.z) - g.rotation.y) * Math.min(1, dt * 6);
+      moving = true;
+    }
   }
-  cat.tail.rotation.y = Math.sin(t * 3.5) * 0.35;
-  if (cat.idle > 0) { cat.idle -= dt; g.position.y = 0; return; }
-  if (!cat.target) { cat.target = newCatTarget(); cat.stall = 0; }
-  const d = new THREE.Vector3().subVectors(cat.target, g.position); d.y = 0;
-  const dist = d.length();
-  if (dist < 0.7) { cat.target = null; cat.idle = 1.5 + Math.random() * 3; return; }
-  d.normalize();
-  const step = Math.min(CAT_SPEED * dt, dist);
-  const next = g.position.clone().addScaledVector(d, step);
-  next.y = 0;
-  resolveCollision(next);            // il gatto rispetta gli ostacoli (fontana compresa)
-  const moved = next.distanceTo(g.position);
-  g.position.copy(next);
-  cat.stall = moved < step * 0.4 ? cat.stall + dt : 0; // incastrato contro un muro?
-  if (cat.stall > 1.2) { cat.target = null; cat.stall = 0; }
-  g.rotation.y += wrapAngle(Math.atan2(d.x, d.z) - g.rotation.y) * Math.min(1, dt * 6);
-  g.position.y = Math.abs(Math.sin(t * 9)) * 0.05; // passetti
+
+  /* ---- posa e animazione ---- */
+  cat.sitT += ((moving ? 0 : 1) - cat.sitT) * Math.min(1, dt * 5); // 0 = in piedi, 1 = seduto
+  const sit = cat.sitT;
+  cat.torso.rotation.x = -0.55 * sit; // busto su: posa seduta
+  for (const l of cat.legs) {
+    const trot = moving ? Math.sin(t * 11 + l.phase) * 0.55 : 0;   // trotto: diagonali insieme
+    l.m.rotation.x = trot * (1 - sit) + (l.front ? 0.55 : 1.15) * sit; // davanti dritte, dietro ripiegate
+  }
+  g.position.y = moving ? Math.abs(Math.sin(t * 9)) * 0.05 * (1 - sit) : 0; // passetti
+
+  // testa: compensa la seduta; durante le coccole ciondola, da fermo si guarda intorno
+  let hx = 0.3 * sit, hy = 0, hz = 0;
+  if (cat.pet > 0) { hx += 0.12; hz = Math.sin(t * 7) * 0.16; }
+  else if (!moving) hy = Math.sin(t * 0.6) * 0.45 + Math.sin(t * 1.7) * 0.12;
+  cat.head.rotation.x += (hx - cat.head.rotation.x) * Math.min(1, dt * 5);
+  cat.head.rotation.y += (hy - cat.head.rotation.y) * Math.min(1, dt * 5);
+  cat.head.rotation.z += (hz - cat.head.rotation.z) * Math.min(1, dt * 6);
+
+  // coda: felice alle coccole, pigra da seduto, ondeggia nel trotto; a terra da seduto
+  cat.tail.rotation.y = cat.pet > 0 ? Math.sin(t * 14) * 0.7
+                      : !moving     ? Math.sin(t * 2.1) * 0.5
+                      :               Math.sin(t * 6) * 0.3;
+  cat.tail.rotation.x = -0.5 * sit;
+
+  // sbatte le palpebre ogni 2.5–6 s
+  cat.blinkT -= dt;
+  if (cat.blinkT <= 0) cat.blinkT = 2.5 + Math.random() * 3.5;
+  const eyeY = cat.blinkT < 0.12 ? 0.15 : 1;
+  for (const e of cat.eyes) e.scale.y = eyeY;
 }
 
 function petCat() {
@@ -382,9 +489,8 @@ function petCat() {
 const splashes = [];
 const splashGeo = new THREE.SphereGeometry(0.1, 6, 5);
 const splashMat = new THREE.MeshStandardMaterial({ color: "#bfe6ff", roughness: 0.25 });
-function doSplash(x, z) {
-  Sound.splash();
-  for (let i = 0; i < 26; i++) {
+function spawnDrops(x, z, count) {
+  for (let i = 0; i < count; i++) {
     const m = new THREE.Mesh(splashGeo, splashMat);
     m.position.set(x + (Math.random() - 0.5) * 0.6, 0.5, z + (Math.random() - 0.5) * 0.6);
     const a = Math.random() * Math.PI * 2, r = 1.2 + Math.random() * 2.4;
@@ -392,6 +498,7 @@ function doSplash(x, z) {
     scene.add(m);
   }
 }
+function doSplash(x, z) { Sound.splash(); spawnDrops(x, z, 26); }
 function updateSplashes(dt) {
   for (let i = splashes.length - 1; i >= 0; i--) {
     const s = splashes[i];
@@ -489,7 +596,7 @@ $("#jump-btn-mobile").addEventListener("pointerdown", e => { e.stopPropagation()
    ========================================================================= */
 const clock = new THREE.Clock();
 const SPEED = 8;
-if (import.meta.env.DEV) window.__dbg = { player, camera, scene, colliders, resolveCollision, tryJump, doSplash, petCat, setYaw: v => { cameraYaw = v; }, get grounded() { return grounded; }, get cat() { return cat; }, get splashCount() { return splashes.length; } }; // ispezione in sviluppo
+if (import.meta.env.DEV) window.__dbg = { player, camera, scene, colliders, resolveCollision, tryJump, doSplash, petCat, Sound, setYaw: v => { cameraYaw = v; }, get grounded() { return grounded; }, get inWater() { return inWater; }, get cat() { return cat; }, get splashCount() { return splashes.length; } }; // ispezione in sviluppo
 let facing = 0;
 let nearDoor = null;
 const prompt = $("#prompt"), promptText = $("#prompt-text"), enterBtnM = $("#enter-btn-mobile");
@@ -526,7 +633,7 @@ function resolveCollision(pos, ignoreFountain = false) {
   pos.z = Math.max(-78, Math.min(78, pos.z));
 }
 
-let wasMoving = false;
+let wasMoving = false, stepT = 0;
 function update(dt) {
   // direzione di movimento relativa alla camera
   const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
@@ -545,16 +652,26 @@ function update(dt) {
     .addScaledVector(fwd, iz).addScaledVector(right, ix);
   const moving = move.lengthSq() > 0.001;
 
-  // dentro la fontana (o in volo) il suo bordo non respinge: tuffo e uscita liberi
-  const inFountain = Math.hypot(player.position.x, player.position.z) < 4.2;
+  // uscita dall'acqua camminando oltre il bordo (isteresi: vedi dichiarazione di inWater)
+  if (inWater && Math.hypot(player.position.x, player.position.z) > 4.45) inWater = false;
 
   if (moving) {
-    move.normalize().multiplyScalar(SPEED * dt);
+    move.normalize().multiplyScalar(SPEED * (inWater ? 0.55 : 1) * dt); // l'acqua rallenta
     const next = player.position.clone().add(move);
-    resolveCollision(next, !grounded || inFountain);
+    resolveCollision(next, !grounded || inWater);
     player.position.copy(next);
     facing = Math.atan2(move.x, move.z);
   }
+
+  // passi: suono a cadenza regolare camminando a terra (in acqua: sciacquettio + gocce)
+  if (moving && grounded) {
+    stepT -= dt;
+    if (stepT <= 0) {
+      stepT = inWater ? 0.34 : 0.28;
+      Sound.step(inWater);
+      if (inWater) spawnDrops(player.position.x, player.position.z, 3);
+    }
+  } else stepT = 0.09; // il primo passo parte appena ci si avvia
   // rotazione fluida verso la direzione
   let d = facing - player.rotation.y;
   while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
@@ -566,9 +683,10 @@ function update(dt) {
     player.position.y += vy * dt;
     if (player.position.y <= 0) {
       player.position.y = 0; vy = 0; grounded = true;
-      // atterraggio in fontana → SPLASH! 💦
-      if (Math.hypot(player.position.x, player.position.z) < 4.2)
-        doSplash(player.position.x, player.position.z);
+      // atterraggio: in fontana → SPLASH! 💦 (ed entra lo stato "in acqua"), altrimenti tonfo
+      inWater = Math.hypot(player.position.x, player.position.z) < 4.2;
+      if (inWater) doSplash(player.position.x, player.position.z);
+      else Sound.step();
       if (actJump) {
         actJump.fadeOut(0.12);
         (moving ? actMove : actIdle).reset().fadeIn(0.12).play();

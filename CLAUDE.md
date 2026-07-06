@@ -19,6 +19,10 @@ Deploy su Render completato (vedi changelog). Repo: https://github.com/Giga191/G
 (pubblico, branch `master`, auto-deploy attivo: ogni `git push` ripubblica da solo).
 ✅ **Easter egg AGGIUNTI** (richiesti entrambi dall'utente): gatto nero da accarezzare +
 tuffo nella fontana con splash (vedi changelog 2026-07-06).
+✅ **Rifiniture del 2026-07-06**: fix collisioni fontana (+zampillo solido, acqua che rallenta),
+gatto con animazioni articolate (siede, trotta, si guarda intorno, sbatte le palpebre),
+suoni dei passi (con sciacquettio in acqua). **Non ancora committato/pushato**: chiedere
+all'utente se pubblicare (git push → auto-deploy Render).
 **Nessuna domanda in sospeso.** Opzionale in futuro: dominio personalizzato (dashboard Render).
 
 *(Già confermato dall'utente: sì, ad ogni blocco di lavoro devo scrivere "CLAUDE.md aggiornato".)*
@@ -182,6 +186,35 @@ cinema, musica, moda. Scrive in italiano.
 ---
 
 ## 8. Changelog (aggiungere in cima, con data)
+
+### 2026-07-06 (splash della fontana migliorato) 🔊💦
+`Sound.splash()` rifatto in **3 strati** (prima: singolo burst di rumore lowpass):
+(1) **tonfo** d'impatto — sinusoide 260→70 Hz in 0.18 s; (2) **corpo** — rumore 0.7 s con
+inviluppo in potenza 1.6 e **bandpass che si apre a 2600 Hz ("sciaff") e ridiscende a 700**;
+(3) **5 goccioline** — "plin" sinusoidali 900–1800 Hz con micro-glissando in giù, sparsi
+tra +0.15 e +0.55 s. NB Web Audio: le rampe esponenziali non partono/arrivano a 0 → si usa
+0.0001 (o linearRamp per l'attacco). Verificato headless (2 splash consecutivi, ctx running,
+0 errori) e build OK.
+
+### 2026-07-06 (collisioni fontana + animazioni gatto + suoni passi) 🐾👣
+Richieste utente, tutto in `game.js`:
+- **Fix collisioni fontana** (si poteva entrare camminando!): il push-out lasciava il giocatore a
+  ~4.1999 dal centro (float), il frame dopo `inFountain < 4.2` era vero e il collider veniva
+  ignorato. Ora `inWater` è uno **stato con isteresi**: diventa true SOLO atterrando dentro
+  (tuffo), false oltre r=4.45 → il bordo non "sfarfalla" mai. In più: **zampillo centrale solido**
+  (collider r=1.1 sempre attivo, anche in acqua/volo) e **l'acqua rallenta** (SPEED ×0.55).
+- **Gatto rifatto ad articolazioni**: `torso` con perno sull'anca posteriore (→ **posa SEDUTA**
+  quando è fermo o coccolato: busto -0.55 rad, zampe davanti dritte, dietro ripiegate, coda a
+  terra), zampe con perno all'anca (geometria traslata) che **trottano in diagonale** (fasi 0/π),
+  **testa mobile** (si guarda intorno da fermo con seni sovrapposti, ciondola durante le coccole),
+  **sbatte le palpebre** ogni 2.5–6 s (scale.y occhi). Transizioni via `sitT` lerp.
+- **Suoni dei passi**: `Sound.step(inWater)` — burst di rumore lowpass ~300–440 Hz (freq random:
+  ogni passo diverso), in acqua bandpass 1300 Hz (sciacquettio) + **3 goccioline** per passo
+  (`spawnDrops`, estratto da `doSplash`). Cadenza 0.28 s (0.34 in acqua), tonfo all'atterraggio
+  del salto. Come tutto l'audio: attivo solo con 🔊 on.
+- `__dbg` esteso (inWater, Sound). Verificato headless (test A–G): camminando ci si ferma a
+  r=4.2, col salto inWater+26 schizzi, zampillo blocca a r=1.1, si esce camminando, seduta/trotto/
+  coccole ok, 0 errori console. Build OK.
 
 ### 2026-07-06 (easter egg: gatto nero + tuffo in fontana) 🐈‍⬛💦
 Richiesti entrambi dall'utente. Tutto in `game.js` (sezione 3b) + `content.js` (ui.petCat) + `game.css` (.heart):
