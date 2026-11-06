@@ -14,6 +14,11 @@
 > Aggiornare SEMPRE questa sezione con l'ultima cosa chiesta all'utente, così se cambia chat
 > si riprende esattamente da qui.
 
+**Stato (2026-11-06):** ✅ **CV di novembre 2026 integrato** sul branch `cv-novembre-2026`
+(NON ancora su `master` → NON ancora online). Testi, competenze e PDF aggiornati, build e preview OK.
+**Domanda aperta:** posso unire il branch in `master` e fare push (= pubblicazione automatica su Render)?
+Vedi changelog 2026-11-06.
+
 **Stato (2026-07-07):** ✅ **CV e foto aggiornati** dal nuovo curriculum fornito dall'utente
 (cartella `Nuovo Cv e nuova foto/`): nuova foto profilo (giacca) ritagliata a 400×400,
 nuovo lavoro **Sviluppatore @ Tecno Quality**, nuove competenze (VB.NET, Power BI, Apache
@@ -191,6 +196,24 @@ cinema, musica, moda. Scrive in italiano.
 ---
 
 ## 8. Changelog (aggiungere in cima, con data)
+
+### 2026-11-06 (CV di novembre 2026) 📄
+Richiesta utente: allineare il sito al nuovo CV (`Desktop/Giancarlo Crudele CV 06_11_26.pdf`),
+dopo aver aggiornato anche LinkedIn. Lavoro sul branch **`cv-novembre-2026`**.
+- **PDF scaricabile** sostituito in `public/assets/` e `assets/` (`cv-giancarlo-crudele.pdf`).
+- **`js/content.js`**: ruolo → "Programmatore / Sistemista"; "Chi sono" riscritto dalla
+  presentazione del CV (Full Stack, BI, sistemi e reti, supporto IT). Esperienze in ordine
+  cronologico inverso: **Tecno Quality** = Programmatore / Sistemista, Nov 2025 – Ott 2026 (concluso),
+  6 punti dal CV; **nuova voce Euronet Srl** (Sistemista / Helpdesk, Feb – Nov 2025, sede
+  **Grottaglie**: confermata dall'utente, anche se il PDF dice Palese); Inventory Service e
+  Primark **conclusi a Giu 2025** (nel vecchio CV erano "Attuale" per errore); Exprivia con
+  dettaglio Java + HTML/Angular.
+- **Competenze**: C# / .NET, Visual Basic / VB.NET, SQL / MySQL; gruppo "BI" (Power BI, Superset)
+  e nuovo gruppo **"Sistemi & Reti"** (Ubiquiti UniFi, Docker, Proxmox, VPN NetBird, Help desk).
+  **Hyper-V rimosso** (non è più nel CV), sostituito da Proxmox. Tag aggiornati.
+- `cv.html`: meta description → "programmatore e sistemista".
+- Verificato: `npm run build` OK; `vite preview` → cv.html con i testi nuovi, PDF 200
+  (453 KB), città 3D carica senza errori console.
 
 ### 2026-07-07 (aggiornamento CV + foto nuova) 📄📸
 Richiesta utente: integrare le info del nuovo curriculum (`Nuovo Cv e nuova foto/`) e la nuova foto.

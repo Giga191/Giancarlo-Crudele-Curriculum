@@ -14,8 +14,8 @@ const CONTENT = {
     photo: "assets/foto.jpg",            // metti qui la tua foto (opzionale)
     cvFile: "assets/cv-giancarlo-crudele.pdf",
     role: {
-      it: "Sviluppatore Software · Laureando in Ingegneria Informatica",
-      en: "Software Developer · Computer Engineering Student"
+      it: "Programmatore / Sistemista · Laureando in Ingegneria Informatica",
+      en: "Software Developer / Systems Administrator · Computer Engineering Student"
     },
     location: { it: "Triggiano (BA), Italia", en: "Triggiano (BA), Italy" },
     email: "giancarlocrudele191@gmail.com",
@@ -58,16 +58,16 @@ const CONTENT = {
       subtitle: { it: "Il villaggio di partenza", en: "The starting village" },
       body: {
         it: [
-          "Sono Giancarlo Crudele, perito tecnico informatico e laureando in Ingegneria Informatica all'Università Mercatorum.",
-          "Dopo il diploma ho frequentato l'ITS Apulia Digital Maker (indirizzo Developer 4.0), unendo una solida base teorica a tanta pratica: linguaggi di programmazione, database, sviluppo applicativo e analisi software.",
-          "Sono appassionato di tecnologie emergenti — Big Data, Cloud, Intelligenza Artificiale e Cybersecurity — e credo siano centrali per le sfide future.",
-          "Orientato al problem-solving, abituato a lavorare in team e a non mollare davanti alle sfide. Curioso per natura, simpatico e carismatico: caratteristiche che porto con me in ogni ambiente di lavoro."
+          "Sono Giancarlo Crudele, perito tecnico informatico e laureando in Ingegneria Informatica all'Università Mercatorum. Dopo il diploma ho frequentato l'ITS Apulia Digital Maker (corso Developer 4.0), dove ho consolidato le basi informatiche e acquisito competenze pratiche nello sviluppo software.",
+          "Ho maturato esperienza in diversi ambiti dell'informatica, costruendo un profilo tecnico trasversale: sviluppo Full Stack (C#, .NET, Java, Angular, HTML, CSS, JavaScript) e gestione di database; Business Intelligence con dashboard in Microsoft Power BI e Apache Superset; amministrazione di sistemi e reti, con installazione, configurazione e manutenzione di apparati di rete, workstation e periferiche.",
+          "Il lavoro sul campo mi ha insegnato troubleshooting, assistenza tecnica e supporto agli utenti, affrontando problemi hardware, software e infrastrutturali in contesti diversi.",
+          "Sono curioso, dinamico e orientato al problem-solving, con una forte passione per la tecnologia. Imparo in fretta, mi adatto bene e lavoro volentieri sia in autonomia sia in team. Il mio obiettivo è crescere in realtà dinamiche, contribuendo allo sviluppo di soluzioni tecnologiche e all'innovazione dei processi aziendali."
         ],
         en: [
-          "I'm Giancarlo Crudele, a certified IT technician and Computer Engineering student at Università Mercatorum.",
-          "After high school I attended ITS Apulia Digital Maker (Developer 4.0 track), combining a solid theoretical base with hands-on practice: programming languages, databases, application development and software analysis.",
-          "I'm passionate about emerging tech — Big Data, Cloud, Artificial Intelligence and Cybersecurity — which I believe are central to future challenges.",
-          "Problem-solving oriented, used to teamwork and to never giving up on a challenge. Curious by nature, friendly and outgoing: traits I bring to every workplace."
+          "I'm Giancarlo Crudele, a certified IT technician and Computer Engineering student at Università Mercatorum. After high school I attended ITS Apulia Digital Maker (Developer 4.0 course), where I strengthened my IT foundations and gained hands-on software development skills.",
+          "I've built a cross-functional technical profile across several IT areas: Full Stack development (C#, .NET, Java, Angular, HTML, CSS, JavaScript) and database management; Business Intelligence with dashboards in Microsoft Power BI and Apache Superset; systems and network administration, installing, configuring and maintaining network devices, workstations and peripherals.",
+          "Working in the field taught me troubleshooting, technical assistance and user support, tackling hardware, software and infrastructure issues in different settings.",
+          "I'm curious, dynamic and problem-solving oriented, with a strong passion for technology. I learn fast, adapt well and enjoy working both independently and in a team. My goal is to grow in dynamic companies, helping build technology solutions and innovate business processes."
         ]
       }
     },
@@ -79,25 +79,69 @@ const CONTENT = {
       subtitle: { it: "Le torri del lavoro", en: "The work towers" },
       items: [
         {
-          role: { it: "Sviluppatore di software", en: "Software Developer" },
-          org: "Tecno Quality",
+          role: { it: "Programmatore / Sistemista", en: "Software Developer / Systems Administrator" },
+          org: "Tecno Quality Srl",
           place: { it: "Rutigliano, Italia", en: "Rutigliano, Italy" },
-          period: { it: "Dic 2025 – Attuale", en: "Dec 2025 – Present" },
+          period: { it: "Nov 2025 – Ott 2026", en: "Nov 2025 – Oct 2026" },
           desc: {
             it: [
-              "Sviluppo e manutenzione di applicazioni gestionali in VB.NET.",
-              "Progettazione e personalizzazione di dashboard di Business Intelligence.",
-              "Gestione di infrastruttura virtualizzata: VM Hyper-V e container Docker su ambienti Linux.",
-              "Configurazione e troubleshooting di reti VPN e di dispositivi hardware in rete (es. stampanti per etichette).",
-              "Sviluppo di soluzioni di automazione e integrazione tra sistemi diversi."
+              "Sviluppo Full Stack: applicazioni web con backend in .NET e frontend in HTML, CSS e JavaScript.",
+              "Business Intelligence: dashboard interattive e strumenti di analisi dei dati con Microsoft Power BI e Apache Superset.",
+              "Infrastrutture e servizi: configurazione e manutenzione di container Docker per Superset e NetBird (BI e accesso remoto).",
+              "Networking: installazione, configurazione e manutenzione di dispositivi di rete Ubiquiti UniFi.",
+              "Manutenzione hardware: installazione, configurazione e assistenza su stampanti industriali e dispositivi hardware.",
+              "Help Desk e supporto IT: assistenza agli utenti, gestione delle problematiche e manutenzione dei software aziendali."
             ],
             en: [
-              "Development and maintenance of business management applications in VB.NET.",
-              "Design and customization of Business Intelligence dashboards.",
-              "Virtualized infrastructure management: Hyper-V VMs and Docker containers on Linux.",
-              "Setup and troubleshooting of VPN networks and networked hardware (e.g. label printers).",
-              "Automation and integration solutions across different systems."
+              "Full Stack development: web applications with a .NET backend and an HTML, CSS and JavaScript frontend.",
+              "Business Intelligence: interactive dashboards and data analysis tools with Microsoft Power BI and Apache Superset.",
+              "Infrastructure and services: setup and maintenance of Docker containers for Superset and NetBird (BI and remote access).",
+              "Networking: installation, configuration and maintenance of Ubiquiti UniFi network devices.",
+              "Hardware maintenance: installation, configuration and support for industrial printers and hardware devices.",
+              "Help Desk and IT support: user assistance, issue handling and maintenance of business software."
             ]
+          }
+        },
+        {
+          role: { it: "Sistemista / Helpdesk", en: "Systems Administrator / Helpdesk" },
+          org: "Euronet Srl",
+          place: { it: "Grottaglie, Italia", en: "Grottaglie, Italy" },
+          period: { it: "Feb 2025 – Nov 2025", en: "Feb 2025 – Nov 2025" },
+          desc: {
+            it: [
+              "Installazione, configurazione e manutenzione dell'infrastruttura di rete aeroportuale.",
+              "Gestione e manutenzione di apparati di rete e infrastrutture LAN.",
+              "Installazione e manutenzione di workstation, PC, periferiche, stampanti e dispositivi di stampa.",
+              "Help desk e supporto tecnico di primo livello: diagnosi e risoluzione di problemi hardware e software.",
+              "Installazione e configurazione di sistemi operativi e applicativi."
+            ],
+            en: [
+              "Installation, configuration and maintenance of the airport network infrastructure.",
+              "Management and maintenance of network devices and LAN infrastructure.",
+              "Installation and maintenance of workstations, PCs, peripherals, printers and print devices.",
+              "First-level help desk and technical support: diagnosing and fixing hardware and software issues.",
+              "Installation and configuration of operating systems and applications."
+            ]
+          }
+        },
+        {
+          role: { it: "Responsabile inventario farmacie", en: "Pharmacy Inventory Lead" },
+          org: "Inventory Service European S.R.L.",
+          place: { it: "Bari, Italia", en: "Bari, Italy" },
+          period: { it: "Dic 2024 – Giu 2025", en: "Dec 2024 – Jun 2025" },
+          desc: {
+            it: ["Gestione e coordinamento delle attività di inventario presso farmacie."],
+            en: ["Management and coordination of inventory activities at pharmacies."]
+          }
+        },
+        {
+          role: { it: "Commesso di negozio di abbigliamento", en: "Retail Sales Assistant" },
+          org: "Primark",
+          place: { it: "Casamassima, Italia", en: "Casamassima, Italy" },
+          period: { it: "Nov 2024 – Giu 2025", en: "Nov 2024 – Jun 2025" },
+          desc: {
+            it: ["Assistenza clienti, gestione del punto vendita e del reparto."],
+            en: ["Customer assistance, store and department management."]
           }
         },
         {
@@ -106,28 +150,8 @@ const CONTENT = {
           place: { it: "Molfetta, Italia", en: "Molfetta, Italy" },
           period: { it: "Dic 2023 – Mag 2024", en: "Dec 2023 – May 2024" },
           desc: {
-            it: ["Sviluppo di un applicativo in uso presso una Pubblica Amministrazione."],
-            en: ["Development of an application used by a Public Administration body."]
-          }
-        },
-        {
-          role: { it: "Responsabile inventario farmacie", en: "Pharmacy Inventory Lead" },
-          org: "Inventory Service European S.R.L.",
-          place: { it: "Bari, Italia", en: "Bari, Italy" },
-          period: { it: "Dic 2024 – Attuale", en: "Dec 2024 – Present" },
-          desc: {
-            it: ["Gestione e coordinamento delle attività di inventario presso farmacie."],
-            en: ["Management and coordination of inventory activities at pharmacies."]
-          }
-        },
-        {
-          role: { it: "Addetto vendite abbigliamento", en: "Retail Sales Assistant" },
-          org: "Primark",
-          place: { it: "Casamassima, Italia", en: "Casamassima, Italy" },
-          period: { it: "Nov 2024 – Attuale", en: "Nov 2024 – Present" },
-          desc: {
-            it: ["Assistenza clienti, gestione del punto vendita e del reparto."],
-            en: ["Customer assistance, store and department management."]
+            it: ["Sviluppo di una soluzione software per una Pubblica Amministrazione, con backend in Java e frontend in HTML e Angular."],
+            en: ["Development of a software solution for a Public Administration body, with a Java backend and an HTML and Angular frontend."]
           }
         },
         {
@@ -200,8 +224,8 @@ const CONTENT = {
           name: { it: "Linguaggi", en: "Languages" },
           skills: [
             { name: "Java", level: 75 },
-            { name: "C#", level: 70 },
-            { name: "VB.NET", level: 65 },
+            { name: "C# / .NET", level: 70 },
+            { name: "Visual Basic / VB.NET", level: 65 },
             { name: "C++", level: 60 },
             { name: "C", level: 55 }
           ]
@@ -219,24 +243,32 @@ const CONTENT = {
         {
           name: { it: "Dati & Strumenti", en: "Data & Tools" },
           skills: [
-            { name: "SQL", level: 70 },
+            { name: "SQL / MySQL", level: 70 },
             { name: "NoSQL", level: 55 },
             { name: "UML", level: 65 }
           ]
         },
         {
-          name: { it: "BI & Infrastruttura", en: "BI & Infrastructure" },
+          name: { it: "Business Intelligence", en: "Business Intelligence" },
           skills: [
             { name: "Power BI", level: 65 },
-            { name: "Apache Superset", level: 60 },
-            { name: "Hyper-V", level: 60 },
-            { name: "Docker", level: 55 }
+            { name: "Apache Superset", level: 60 }
+          ]
+        },
+        {
+          name: { it: "Sistemi & Reti", en: "Systems & Networking" },
+          skills: [
+            { name: "Ubiquiti UniFi", level: 65 },
+            { name: "Docker", level: 60 },
+            { name: "Proxmox", level: 55 },
+            { name: "VPN (NetBird)", level: 60 },
+            { name: "Help desk / Troubleshooting", level: 75 }
           ]
         }
       ],
       tags: {
-        it: ["Business Intelligence", "Virtualizzazione (Hyper-V/Docker)", "Reti & VPN", "Microservizi", "Quality Assurance / JUnit", "Big Data & Cloud", "Intelligenza Artificiale", "Cybersecurity", "Project Management", "UX/UI", "Patente B"],
-        en: ["Business Intelligence", "Virtualization (Hyper-V/Docker)", "Networking & VPN", "Microservices", "Quality Assurance / JUnit", "Big Data & Cloud", "Artificial Intelligence", "Cybersecurity", "Project Management", "UX/UI", "Driving licence B"]
+        it: ["Sviluppo Full Stack", "Business Intelligence", "Gestione sistemi e reti", "Virtualizzazione (Proxmox/Docker)", "Hardware e stampanti industriali", "Supporto IT", "Microservizi", "Quality Assurance / JUnit", "Big Data & Cloud", "Intelligenza Artificiale", "Cybersecurity", "Project Management", "UX/UI", "Patente B"],
+        en: ["Full Stack development", "Business Intelligence", "Systems & network management", "Virtualization (Proxmox/Docker)", "Hardware & industrial printers", "IT support", "Microservices", "Quality Assurance / JUnit", "Big Data & Cloud", "Artificial Intelligence", "Cybersecurity", "Project Management", "UX/UI", "Driving licence B"]
       }
     },
 
