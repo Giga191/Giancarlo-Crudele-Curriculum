@@ -14,10 +14,10 @@
 > Aggiornare SEMPRE questa sezione con l'ultima cosa chiesta all'utente, così se cambia chat
 > si riprende esattamente da qui.
 
-**Stato (2026-11-06):** ✅ **CV di novembre 2026 integrato** sul branch `cv-novembre-2026`
-(NON ancora su `master` → NON ancora online). Testi, competenze e PDF aggiornati, build e preview OK.
-**Domanda aperta:** posso unire il branch in `master` e fare push (= pubblicazione automatica su Render)?
-Vedi changelog 2026-11-06.
+**Stato (2026-11-06):** ✅ **CV di novembre 2026 ONLINE** (commit 99635d6, branch
+`cv-novembre-2026` unito in `master` con fast-forward e pushato su richiesta dell'utente).
+Verificato sul sito live: nuovo PDF (453 KB), cv.html e bundle con Euronet/UniFi.
+**Nessuna domanda in sospeso.** Vedi changelog 2026-11-06.
 
 **Stato (2026-07-07):** ✅ **CV e foto aggiornati** dal nuovo curriculum fornito dall'utente
 (cartella `Nuovo Cv e nuova foto/`): nuova foto profilo (giacca) ritagliata a 400×400,
@@ -214,6 +214,8 @@ dopo aver aggiornato anche LinkedIn. Lavoro sul branch **`cv-novembre-2026`**.
 - `cv.html`: meta description → "programmatore e sistemista".
 - Verificato: `npm run build` OK; `vite preview` → cv.html con i testi nuovi, PDF 200
   (453 KB), città 3D carica senza errori console.
+- **Pubblicato**: commit 99635d6 → fast-forward su `master` → push → deploy Render live in ~45 s
+  (verificato con curl: PDF nuovo, meta di cv.html e testi nel bundle JS).
 
 ### 2026-07-07 (aggiornamento CV + foto nuova) 📄📸
 Richiesta utente: integrare le info del nuovo curriculum (`Nuovo Cv e nuova foto/`) e la nuova foto.
